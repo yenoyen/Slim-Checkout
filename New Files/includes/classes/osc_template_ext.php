@@ -31,7 +31,7 @@
                                    'header' => MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER, 
                                    'footer' => MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER, 
                                    'footer_suffix' => MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX);
-        if ( ((strpos($group, 'boxes_column') !== false) || ((MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES == '0' || strpos($this->_page, 'checkout') !== false)) || (MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES == '2' && $this->_page == 'shopping_cart.php')) ) {
+        if ( ((MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES == '0' || strpos($this->_page, 'checkout') !== false)) || (MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES == '2' && $this->_page == 'shopping_cart.php') ) {
           $this->_hide_columns = true;
         }  
       }
