@@ -47,10 +47,11 @@
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Slim Checkout', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_STATUS', 'True', 'Enable this module?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Navbar', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR', '0', 'Hide the Navabr module on Checkout Pages?<br>0 = Do Not Hide<br>1 = Hide on Checkout Pages<br>2 = Hide on Shopping Cart and Checkout Pages', '6', '3', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Header Area Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER', '0', 'Hide the modules in the Header Area on Checkout Pages?<br>0 = Do Not Hide<br>1 = Hide on Checkout Pages<br>2 = Hide on Shopping Cart and Checkout Pages', '6', '3', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Exclude Header Logo', 'MODULE_HEADER_TAGS_SLIM_HEADER_LOGO', 'True', 'Show the Store Logo in the Header area always, even the other header modules are hidden?<br> Show it always = True<br>Hide it also if header area is hidden = False.', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Side Column Boxes', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES', '1', 'Hide the Side Column Boxes on Checkout Pages?<br>0 = Do Not Hide<br>1 = Hide on Checkout Pages<br>2 = Hide on Shopping Cart and Checkout Pages', '6', '3', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Footer Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER', '0', 'Hide the Footer Modules on Checkout Pages?<br>0 = Do Not Hide<br>1 = Hide on Checkout Pages<br>2 = Hide on Shopping Cart and Checkout Pages', '6', '3', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Footer Suffix Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX', '0', 'Hide the Footer Suffix Modules on Checkout Pages?<br>0 = Do Not Hide<br>1 = Hide on Checkout Pages<br>2 = Hide on Shopping Cart and Checkout Pages', '6', '3', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Exclude Header Logo', 'MODULE_HEADER_TAGS_SLIM_HEADER_LOGO', 'True', 'Show the Store Logo in the Header area always, even the other header modules are hidden?<br> Show it always = True<br>Hide it also if header area is hidden = False.', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Content Width', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH', '8', 'Content width if side columns are hidden.<br>Should be a pair value between the normal main content width (default = 8) => no content stretch, and the max width (12) => stretch content to full width.<br>Usual values: 8, 10 or 12', '6', '3', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort Order', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '27', now())");
     }
 
@@ -62,10 +63,11 @@
       return array('MODULE_HEADER_TAGS_SLIM_CHECKOUT_STATUS',
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR',
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER',
-                   'MODULE_HEADER_TAGS_SLIM_HEADER_LOGO', 
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES',
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER',
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX',
+                   'MODULE_HEADER_TAGS_SLIM_HEADER_LOGO', 
+                   'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH', 
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER');
     }
    
@@ -98,7 +100,7 @@
     
       function getGridContentWidth() {
         if ( $this->_hide_columns === true ) {
-          return $this->_grid_container_width;
+          return MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH;
         } else {
           return $this->_grid_content_width;
         }
@@ -106,7 +108,7 @@
   
       function getGridColumnWidth() {
         if ( $this->_hide_columns === true ) {
-          return 0;
+          return (12 - MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH) / 2;
         } else {
           return (12 - BOOTSTRAP_CONTENT) / 2;
         }
