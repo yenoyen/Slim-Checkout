@@ -83,7 +83,9 @@
     public $_grid_content_width = BOOTSTRAP_CONTENT;
     public $_grid_column_width = 0; // deprecated
     public $_page;
+    public $_pages = array();
     public $_hide_array = array();
+    public $_control_areas = array('navigation', 'header', 'boxes', 'footer', 'footer_suffix');
   
       function __construct() {
         global $PHP_SELF, $oscTemplate;
@@ -92,13 +94,12 @@
         $this->_grid_container_width = $oscTemplate->_grid_container_width;
         $this->_grid_column_width = $oscTemplate->_grid_column_width;
         $this->_page = basename($PHP_SELF);
-        $navbar = explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR);
-        $pages = array('login.php', 'shopping_cart.php' , 'checkout_shipping.php', 'checkout_payment.php', 'checkout_confirmation.php', 'checkout_success.php');
-        $this->_hide_array['navigation'] = array_combine($pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR));
-        $this->_hide_array['header'] = array_combine($pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER));
-        $this->_hide_array['boxes'] =  array_combine($pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES));
-        $this->_hide_array['footer'] =  array_combine($pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER));
-        $this->_hide_array['footer_suffix'] =  array_combine($pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX));        
+        $this->_pages = array('login.php', 'shopping_cart.php' , 'checkout_shipping.php', 'checkout_payment.php', 'checkout_confirmation.php', 'checkout_success.php');
+        $this->_hide_array['navigation'] = array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR));
+        $this->_hide_array['header'] = array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER));
+        $this->_hide_array['boxes'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES));
+        $this->_hide_array['footer'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER));
+        $this->_hide_array['footer_suffix'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX));        
         }
     
       function getGridContentWidth() {
@@ -118,54 +119,60 @@
       }
   
       function getBlocks($group) {
-        if ( $this->hasBlocks($group) && ((strpos($group, 'boxes_column') === false) || $this->_hide_array['boxes'][$this->_page] == 1) ) {
+        if ( $this->hasBlocks($group) && ((!in_array($this->_page, $this->_pages) || strpos($group, 'boxes_column') === false) || $this->_hide_array['boxes'][$this->_page] == 1) ) {
           return implode("\n", $this->_blocks[$group]);
         }
       }
 
       function addContent($content, $group) {
-        if ( $group == 'header' || $this->_hide_array[$group][$this->_page] == 1 ) {
+        if ( !in_array($this->_page, $this->_pages) || $group == 'header' || $this->_hide_array[$group][$this->_page] == 1 ) {
           $this->_content[$group][] = $content;
         }
       }
 
-    function buildBlocks() {
-      global $language;
-
-      if ( defined('TEMPLATE_BLOCK_GROUPS') && tep_not_null(TEMPLATE_BLOCK_GROUPS) ) {
-        $tbgroups_array = explode(';', TEMPLATE_BLOCK_GROUPS);
-
-        foreach ($tbgroups_array as $group) {
-          $module_key = 'MODULE_' . strtoupper($group) . '_INSTALLED';
-
-          if ( defined($module_key) && tep_not_null(constant($module_key)) ) {
-            $modules_array = explode(';', constant($module_key));
-
-            foreach ( $modules_array as $module ) {
-              $class = basename($module, '.php');
-
-              if ( !class_exists($class) ) {
-                if ( file_exists('includes/languages/' . $language . '/modules/' . $group . '/' . $module) ) {
-                  include('includes/languages/' . $language . '/modules/' . $group . '/' . $module);
+      function getContent($group) {
+        global $language;
+  
+        if ( !class_exists('tp_' . $group) && file_exists('includes/modules/pages/tp_' . $group . '.php') ) {
+          include('includes/modules/pages/tp_' . $group . '.php');
+        }
+  
+        if ( class_exists('tp_' . $group) ) {
+          $template_page_class = 'tp_' . $group;
+          $template_page = new $template_page_class();
+          $template_page->prepare();
+        }
+  
+        foreach ( $this->getContentModules($group) as $module ) {
+          if ( !class_exists($module) ) {
+            if ( $group != 'header' || ($module == 'cm_header_logo' && MODULE_HEADER_TAGS_SLIM_HEADER_LOGO == 'True') || (($this->_hide_array['header'][$this->_page] == 1 )) ) { 
+              if ( file_exists('includes/modules/content/' . $group . '/' . $module . '.php') ) {
+                if ( file_exists('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php') ) {
+                  include('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php');
                 }
-
-                if ( file_exists('includes/modules/' . $group . '/' . $module) ) {
-                  include('includes/modules/' . $group . '/' . $module);
-                }
-              }
-
-              if ( class_exists($class) ) {
-                $mb = new $class();
-
-                if ( $mb->isEnabled() && ( $group != 'header' || ($module == 'cm_header_logo' && MODULE_HEADER_TAGS_SLIM_HEADER_LOGO == 'True') || (($this->_hide_array['header'][$this->_page] == 1 ))) ) {
-                  $mb->execute();
-                }
+    
+                include('includes/modules/content/' . $group . '/' . $module . '.php');
               }
             }
           }
+  
+          if ( class_exists($module) ) {
+            $mb = new $module();
+  
+            if ( $mb->isEnabled() ) {
+              $mb->execute();
+            }
+          }
+        }
+  
+        if ( class_exists('tp_' . $group) ) {
+          $template_page->build();
+        }
+  
+        if ($this->hasContent($group)) {
+          return implode("\n", $this->_content[$group]);
         }
       }
-    }
 
 
     }
