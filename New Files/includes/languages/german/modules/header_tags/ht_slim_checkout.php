@@ -11,6 +11,6 @@
   Released under the GNU General Public License
 */
 
-  define('MODULE_HEADER_TAGS_SLIM_CHECKOUT_TITLE', 'Slim Checkout Module');
-  define('MODULE_HEADER_TAGS_SLIM_CHECKOUT_DESCRIPTION', 'Use the Slim Checkout Module');
+  define('MODULE_HEADER_TAGS_SLIM_CHECKOUT_TITLE', 'Slim Checkout Modul');
+  define('MODULE_HEADER_TAGS_SLIM_CHECKOUT_DESCRIPTION', 'Slim Checkout Modul benutzen');
 ?>

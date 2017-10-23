@@ -22,7 +22,6 @@
     function __construct() {
       $this->title = MODULE_HEADER_TAGS_SLIM_CHECKOUT_TITLE;
       $this->description = MODULE_HEADER_TAGS_SLIM_CHECKOUT_DESCRIPTION;
-      $this->description .= '<div class="secWarning">' . MODULE_HEADER_TAGS_SLIM_CHECKOUT_INSTRUCTIONS . '</div>';
 
       if ( defined('MODULE_HEADER_TAGS_SLIM_CHECKOUT_STATUS') ) {
         $this->sort_order = MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER;
@@ -34,6 +33,7 @@
       global $oscTemplate;
 
       $oscTemplate = new oscTemplateExt;
+
     }
 
     function isEnabled() {
@@ -46,11 +46,11 @@
 
     function install() {
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Slim Checkout', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_STATUS', 'True', 'Enable this module?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Navbar', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR', '0', 'Hide the Navabar module on Checkout Pages?', '6', '3', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Header Area Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER', '0', 'Hide the modules in the Header Area on Checkout Pages?', '6', '3', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Side Column Boxes', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES', '1', 'Hide the Side Column Boxes on Checkout Pages?', '6', '3', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Footer Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER', '0', 'Hide the Footer Modules on Checkout Pages?', '6', '3', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Hide Footer Suffix Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX', '0', 'Hide the Footer Suffix Modules on Checkout Pages?', '6', '3', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Navbar', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR', '0', 'Hide the Navabar module on Checkout Pages?', '6', '3', 'ht_slim_navbar_show_pages', 'ht_slim_navbar_edit_pages(', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Header Area Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER', '" . implode(';', $this->get_default_pages()) . "', 'Hide the modules in the Header Area on Checkout Pages?', '6', '3', 'ht_slim_header_show_pages', 'ht_slim_header_edit_pages(', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Side Column Boxes', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES', '" . implode(';', $this->get_default_pages()) . "', 'Hide the Side Column Boxes on Checkout Pages?', '6', '3', 'ht_slim_boxes_show_pages', 'ht_slim_boxes_edit_pages(', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Footer Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER', '" . implode(';', $this->get_default_pages()) . "', 'Hide the Footer Modules on Checkout Pages?', '6', '3', 'ht_slim_footer_show_pages', 'ht_slim_footer_edit_pages(', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Footer Suffix Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX', '0', 'Hide the Footer Suffix Modules on Checkout Pages?', '6', '3', 'ht_slim_footer_suffix_show_pages', 'ht_slim_footer_suffix_edit_pages(', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Exclude Header Logo', 'MODULE_HEADER_TAGS_SLIM_HEADER_LOGO', 'True', 'Show the Store Logo in the Header area always, even the other header modules are hidden?<br> Show it always = True<br>Hide it also if header area is hidden = False.', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Content Width', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH', '8', 'Content width if side columns are hidden.<br>Should be a pair value between the normal main content width (default = 8) => no content stretch, and the max width (12) => stretch content to full width.<br>Usual values: 8, 10 or 12', '6', '3', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort Order', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '27', now())");
@@ -72,66 +72,340 @@
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER');
     }
    
+    function get_default_pages() {
+      return array('checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php');
+    }
   } // end class
+
+  function ht_slim_navbar_show_pages($text) {
+    return nl2br(implode("\n", explode(';', $text)));
+  }
+
+  function ht_slim_navbar_edit_pages($values, $key) {
+    global $PHP_SELF;
+
+    $files_array = array('login.php',
+                   'shopping_cart.php',
+                   'checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php',
+                   'checkout_success.php');
+
+    $values_array = explode(';', $values);
+
+    $output = '';
+    foreach ($files_array as $file) {
+      $output .= tep_draw_checkbox_field('ht_slim_navbar_file[]', $file, in_array($file, $values_array)) . '&nbsp;' . tep_output_string($file) . '<br />';
+    }
+
+    if (!empty($output)) {
+      $output = '<br />' . substr($output, 0, -6);
+    }
+
+    $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="htrn_navbar_files"');
+
+    $output .= '<script>
+                function htrn_navbar_update_cfg_value() {
+                  var htrn_navbar_selected_files = \'\';
+
+                  if ($(\'input[name="ht_slim_navbar_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_navbar_file[]"]:checked\').each(function() {
+                      htrn_navbar_selected_files += $(this).attr(\'value\') + \';\';
+                    });
+
+                    if (htrn_navbar_selected_files.length > 0) {
+                      htrn_navbar_selected_files = htrn_navbar_selected_files.substring(0, htrn_navbar_selected_files.length - 1);
+                    }
+                  }
+
+                  $(\'#htrn_navbar_files\').val(htrn_navbar_selected_files);
+                }
+
+                $(function() {
+                  htrn_navbar_update_cfg_value();
+
+                  if ($(\'input[name="ht_slim_navbar_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_navbar_file[]"]\').change(function() {
+                      htrn_navbar_update_cfg_value();
+                    });
+                  }
+                });
+                </script>';
+
+    return $output;
+  }
   
+  function ht_slim_header_show_pages($text) {
+    return nl2br(implode("\n", explode(';', $text)));
+  }
+
+  function ht_slim_header_edit_pages($values, $key) {
+    global $PHP_SELF;
+
+    $files_array = array('login.php',
+                   'shopping_cart.php',
+                   'checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php',
+                   'checkout_success.php');
+
+    $values_array = explode(';', $values);
+
+    $output = '';
+    foreach ($files_array as $file) {
+      $output .= tep_draw_checkbox_field('ht_slim_header_file[]', $file, in_array($file, $values_array)) . '&nbsp;' . tep_output_string($file) . '<br />';
+    }
+
+    if (!empty($output)) {
+      $output = '<br />' . substr($output, 0, -6);
+    }
+
+    $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="htrn_header_files"');
+
+    $output .= '<script>
+                function htrn_header_update_cfg_value() {
+                  var htrn_header_selected_files = \'\';
+
+                  if ($(\'input[name="ht_slim_header_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_header_file[]"]:checked\').each(function() {
+                      htrn_header_selected_files += $(this).attr(\'value\') + \';\';
+                    });
+
+                    if (htrn_header_selected_files.length > 0) {
+                      htrn_header_selected_files = htrn_header_selected_files.substring(0, htrn_header_selected_files.length - 1);
+                    }
+                  }
+
+                  $(\'#htrn_header_files\').val(htrn_header_selected_files);
+                }
+
+                $(function() {
+                  htrn_header_update_cfg_value();
+
+                  if ($(\'input[name="ht_slim_header_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_header_file[]"]\').change(function() {
+                      htrn_header_update_cfg_value();
+                    });
+                  }
+                });
+                </script>';
+
+    return $output;
+  }
+
+  function ht_slim_boxes_show_pages($text) {
+    return nl2br(implode("\n", explode(';', $text)));
+  }
+
+  function ht_slim_boxes_edit_pages($values, $key) {
+    global $PHP_SELF;
+
+    $files_array = array('login.php',
+                   'shopping_cart.php',
+                   'checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php',
+                   'checkout_success.php');
+
+    $values_array = explode(';', $values);
+
+    $output = '';
+    foreach ($files_array as $file) {
+      $output .= tep_draw_checkbox_field('ht_slim_boxes_file[]', $file, in_array($file, $values_array)) . '&nbsp;' . tep_output_string($file) . '<br />';
+    }
+
+    if (!empty($output)) {
+      $output = '<br />' . substr($output, 0, -6);
+    }
+
+    $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="htrn_boxes_files"');
+
+    $output .= '<script>
+                function htrn_boxes_update_cfg_value() {
+                  var htrn_boxes_selected_files = \'\';
+
+                  if ($(\'input[name="ht_slim_boxes_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_boxes_file[]"]:checked\').each(function() {
+                      htrn_boxes_selected_files += $(this).attr(\'value\') + \';\';
+                    });
+
+                    if (htrn_boxes_selected_files.length > 0) {
+                      htrn_boxes_selected_files = htrn_boxes_selected_files.substring(0, htrn_boxes_selected_files.length - 1);
+                    }
+                  }
+
+                  $(\'#htrn_boxes_files\').val(htrn_boxes_selected_files);
+                }
+
+                $(function() {
+                  htrn_boxes_update_cfg_value();
+
+                  if ($(\'input[name="ht_slim_boxes_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_boxes_file[]"]\').change(function() {
+                      htrn_boxes_update_cfg_value();
+                    });
+                  }
+                });
+                </script>';
+
+    return $output;
+  }
+
+  function ht_slim_footer_show_pages($text) {
+    return nl2br(implode("\n", explode(';', $text)));
+  }
+
+  function ht_slim_footer_edit_pages($values, $key) {
+    global $PHP_SELF;
+
+    $files_array = array('login.php',
+                   'shopping_cart.php',
+                   'checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php',
+                   'checkout_success.php');
+
+    $values_array = explode(';', $values);
+
+    $output = '';
+    foreach ($files_array as $file) {
+      $output .= tep_draw_checkbox_field('ht_slim_footer_file[]', $file, in_array($file, $values_array)) . '&nbsp;' . tep_output_string($file) . '<br />';
+    }
+
+    if (!empty($output)) {
+      $output = '<br />' . substr($output, 0, -6);
+    }
+
+    $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="htrn_footer_files"');
+
+    $output .= '<script>
+                function htrn_footer_update_cfg_value() {
+                  var htrn_footer_selected_files = \'\';
+
+                  if ($(\'input[name="ht_slim_footer_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_footer_file[]"]:checked\').each(function() {
+                      htrn_footer_selected_files += $(this).attr(\'value\') + \';\';
+                    });
+
+                    if (htrn_footer_selected_files.length > 0) {
+                      htrn_footer_selected_files = htrn_footer_selected_files.substring(0, htrn_footer_selected_files.length - 1);
+                    }
+                  }
+
+                  $(\'#htrn_footer_files\').val(htrn_footer_selected_files);
+                }
+
+                $(function() {
+                  htrn_footer_update_cfg_value();
+
+                  if ($(\'input[name="ht_slim_footer_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_footer_file[]"]\').change(function() {
+                      htrn_footer_update_cfg_value();
+                    });
+                  }
+                });
+                </script>';
+
+    return $output;
+  }
+
+  function ht_slim_footer_suffix_show_pages($text) {
+    return nl2br(implode("\n", explode(';', $text)));
+  }
+
+  function ht_slim_footer_suffix_edit_pages($values, $key) {
+    global $PHP_SELF;
+
+    $files_array = array('login.php',
+                   'shopping_cart.php',
+                   'checkout_shipping.php',
+                   'checkout_payment.php',
+                   'checkout_confirmation.php',
+                   'checkout_success.php');
+
+    $values_array = explode(';', $values);
+
+    $output = '';
+    foreach ($files_array as $file) {
+      $output .= tep_draw_checkbox_field('ht_slim_footer_suffix_file[]', $file, in_array($file, $values_array)) . '&nbsp;' . tep_output_string($file) . '<br />';
+    }
+
+    if (!empty($output)) {
+      $output = '<br />' . substr($output, 0, -6);
+    }
+
+    $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="htrn_footer_suffix_files"');
+
+    $output .= '<script>
+                function htrn_footer_suffix_update_cfg_value() {
+                  var htrn_footer_suffix_selected_files = \'\';
+
+                  if ($(\'input[name="ht_slim_footer_suffix_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_footer_suffix_file[]"]:checked\').each(function() {
+                      htrn_footer_suffix_selected_files += $(this).attr(\'value\') + \';\';
+                    });
+
+                    if (htrn_footer_suffix_selected_files.length > 0) {
+                      htrn_footer_suffix_selected_files = htrn_footer_suffix_selected_files.substring(0, htrn_footer_suffix_selected_files.length - 1);
+                    }
+                  }
+
+                  $(\'#htrn_footer_suffix_files\').val(htrn_footer_suffix_selected_files);
+                }
+
+                $(function() {
+                  htrn_footer_suffix_update_cfg_value();
+
+                  if ($(\'input[name="ht_slim_footer_suffix_file[]"]\').length > 0) {
+                    $(\'input[name="ht_slim_footer_suffix_file[]"]\').change(function() {
+                      htrn_footer_suffix_update_cfg_value();
+                    });
+                  }
+                });
+                </script>';
+
+    return $output;
+  }
 
   if (class_exists('oscTemplate')) {
     class oscTemplateExt extends oscTemplate {
-    public $_blocks = array();
-    public $_content = array();
-    public $_grid_container_width = 12;
-    public $_grid_content_width = BOOTSTRAP_CONTENT;
-    public $_grid_column_width = 0; // deprecated
-    public $_page;
-    public $_pages = array();
-    public $_hide_array = array();
-    public $_control_areas = array('navigation', 'header', 'boxes', 'footer', 'footer_suffix');
-  
+      public $_blocks = array();
+      public $_hide_column = false;
+
       function __construct() {
         global $PHP_SELF, $oscTemplate;
         $this->_blocks = $oscTemplate->_blocks;
-        $this->_content = $oscTemplate->_content;
-        $this->_grid_container_width = $oscTemplate->_grid_container_width;
-        $this->_grid_column_width = $oscTemplate->_grid_column_width;
-        $this->_page = basename($PHP_SELF);
-        $this->_pages = array('login.php', 'shopping_cart.php' , 'checkout_shipping.php', 'checkout_payment.php', 'checkout_confirmation.php', 'checkout_success.php');
-        $this->_hide_array['navigation'] = array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR));
-        $this->_hide_array['header'] = array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER));
-        $this->_hide_array['boxes'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES));
-        $this->_hide_array['footer'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER));
-        $this->_hide_array['footer_suffix'] =  array_combine($this->_pages, explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX));        
-        }
-    
+        // check if side columns are hidden
+        if (in_array(basename($PHP_SELF), explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES))) $this->_hide_column = true;          
+      }
+
       function getGridContentWidth() {
-        if ( $this->_hide_array['boxes'][$this->_page] != 1 ) {
-          return MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH;
+        if ( $this->_hide_column == true ) {
+          return MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH; // define main content width if side columns are hidden
         } else {
           return $this->_grid_content_width;
         }
       }
-  
+
       function getGridColumnWidth() {
-        if ( $this->_hide_array['boxes'][$this->_page] != 1 ) {
+        if ( $this->_hide_column == true ) { // define columns width if side columns are hidden
           return (12 - MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH) / 2;
         } else {
           return (12 - BOOTSTRAP_CONTENT) / 2;
         }
       }
-  
+
       function getBlocks($group) {
-        if ( $this->hasBlocks($group) && ((!in_array($this->_page, $this->_pages) || strpos($group, 'boxes_column') === false) || $this->_hide_array['boxes'][$this->_page] == 1) ) {
+        global $PHP_SELF;
+        if ( $this->hasBlocks($group) && ((strpos($group, 'boxes_column') === false) || !in_array(basename($PHP_SELF), $this->checkPages('bm_'))) ) { // hide side columns
           return implode("\n", $this->_blocks[$group]);
         }
       }
 
-      function addContent($content, $group) {
-        if ( !in_array($this->_page, $this->_pages) || $group == 'header' || $this->_hide_array[$group][$this->_page] == 1 ) {
-          $this->_content[$group][] = $content;
-        }
-      }
-
       function getContent($group) {
-        global $language;
+        global $PHP_SELF, $language;
   
         if ( !class_exists('tp_' . $group) && file_exists('includes/modules/pages/tp_' . $group . '.php') ) {
           include('includes/modules/pages/tp_' . $group . '.php');
@@ -145,21 +419,18 @@
   
         foreach ( $this->getContentModules($group) as $module ) {
           if ( !class_exists($module) ) {
-            if ( $group != 'header' || ($module == 'cm_header_logo' && MODULE_HEADER_TAGS_SLIM_HEADER_LOGO == 'True') || (($this->_hide_array['header'][$this->_page] == 1 )) ) { 
-              if ( file_exists('includes/modules/content/' . $group . '/' . $module . '.php') ) {
-                if ( file_exists('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php') ) {
-                  include('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php');
-                }
-    
-                include('includes/modules/content/' . $group . '/' . $module . '.php');
+            if ( file_exists('includes/modules/content/' . $group . '/' . $module . '.php') ) {
+              if ( file_exists('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php') ) {
+                include('includes/languages/' . $language . '/modules/content/' . $group . '/' . $module . '.php');
               }
+  
+              include('includes/modules/content/' . $group . '/' . $module . '.php');
             }
           }
   
           if ( class_exists($module) ) {
             $mb = new $module();
-  
-            if ( $mb->isEnabled() ) {
+             if ( $mb->isEnabled() && !in_array(basename($PHP_SELF), $this->checkPages($module))) { // check if module should be hidden, get hidden pages array
               $mb->execute();
             }
           }
@@ -174,8 +445,28 @@
         }
       }
 
+      function checkPages($module){ //$module what is called in the and content modules
+        global $PHP_SELF;
+          if (strtok($module, '_') == 'bm') {
+            $module_group_prefix = strtok($module, '_');
+          } elseif ((strpos($module, 'cm_footer_extra') !== false)) {
+            $module_group_prefix = 'footer_extra';
+          } elseif (strtok($module, '_') == 'cm') {
+            $module_group_prefix = (strtok($module, '_'.strtok($module, '_')));
+          }          
+          $hide_array[$module_group_prefix] = array();
+          $hide_array['navbar'] =  explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_NAVBAR);
+          if ($module != 'cm_header_logo' || MODULE_HEADER_TAGS_SLIM_HEADER_LOGO != 'True') {
+            $hide_array['header'] =  explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_HEADER);
+          }
+          $hide_array['bm'] =  explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES);
+          $hide_array['footer'] =  explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER);
+          $hide_array['footer_extra'] =  explode(';', MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX);
+  
+          return $hide_array[$module_group_prefix];
+      }
 
-    }
-  }
+    } // end class
+  } // end if class exists
 
 ?>
