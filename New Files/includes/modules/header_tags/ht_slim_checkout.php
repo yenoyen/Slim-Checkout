@@ -52,9 +52,8 @@
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Side Column Boxes', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_BOXES', '" . implode(';', $this->get_default_pages()) . "', 'Hide the Side Column Boxes on Checkout Pages?', '6', '5', 'ht_slim_boxes_show_pages', 'ht_slim_boxes_edit_pages(', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Footer Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER', '" . implode(';', $this->get_default_pages()) . "', 'Hide the Footer Modules on Checkout Pages?', '6', '6', 'ht_slim_footer_show_pages', 'ht_slim_footer_edit_pages(', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Hide Footer Suffix Modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX', '0', 'Hide the Footer Suffix Modules on Checkout Pages?', '6', '7', 'ht_slim_footer_suffix_show_pages', 'ht_slim_footer_suffix_edit_pages(', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Exclude modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_EXCLUDE', 'cm_header_logo', 'List of modules to show always in the header area, even the module area is hidden?<br>Comma separated list.<br>Only for header modules: \"cm_header_...\"', '6', '8', now())");
+      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Exclude modules', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_EXCLUDE', 'cm_header_logo', 'List of modules to show always in the header area, even the module area is hidden?<br>Comma separated list.<br>Only for header modules: \"cm_header_...\"', '6', '8', 'tep_textarea(', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Content Width', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH', '8', 'Content width if side columns are hidden.<br>Should be a pair value between the normal main content width (default = 8) => no content stretch, and the max width (12) => stretch content to full width.<br>Usual values: 8, 10 or 12', '6', '9', now())");
-      tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Custom Pages', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CUSTOM_PAGES', '', 'Add additional pages to hide areas.<br>Comma separated list of filenames including \".php\"<br>To modify, add/remove and save. Then edit again to see changes in page lists.', '6', '10', now())");
       tep_db_query("insert into configuration (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort Order', 'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '11', now())");
     }
 
@@ -72,7 +71,6 @@
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_FOOTER_SUFFIX',
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_EXCLUDE', 
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CONTENT_WIDTH', 
-                   'MODULE_HEADER_TAGS_SLIM_CHECKOUT_CUSTOM_PAGES', 
                    'MODULE_HEADER_TAGS_SLIM_CHECKOUT_SORT_ORDER');
     }
    
@@ -354,14 +352,18 @@
                          'checkout_shipping.php',
                          'checkout_payment.php',
                          'checkout_confirmation.php',
-                         'checkout_success.php');
-    $custom_files_array = explode(',', MODULE_HEADER_TAGS_SLIM_CHECKOUT_CUSTOM_PAGES);
-    $files_array = array_merge($files_array, $custom_files_array);
-    sort($files_array);
-    
+                         'checkout_success.php');    
     return $files_array;
   }
 
+// Function to read in text area in admin
+  if(!function_exists('tep_textarea')) {
+    function tep_textarea($text, $key = '') {
+      $name = (($key) ? 'configuration[' . $key . ']' : 'configuration_value');
+      return tep_draw_textarea_field($name, false, 35, 5, $text);
+    }
+  }
+  
 // function show the version read only  
   if(!function_exists('tep_version_readonly')) {
   	function tep_version_readonly($value){
