@@ -6,7 +6,7 @@ What it does:
     - select on which pages to hide each area by checkbox list
     - select each group to hide (navbar, header area, boxes, footer and footer suffix
     - define content width if side columns are hiddedn, allows to control if main content gets stretched or keeps withe space for side columns
-    - optional keep showing customized list of header modules if header area is hidden.
+    - optional customized list of header modules to keep showing if header area is hidden.
     
 Installation:
   - copy all new files
